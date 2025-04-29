@@ -3,7 +3,10 @@ const express = require("express");
 const cors = require("cors");
 const path = require("path");
 const connectDB = require("./config/db");
-const authrouter = require("./routes/authRoutes");
+const authRouter = require("./routes/authRoutes");
+const userRouter = require("./routes/userRoutes");
+const taskRouter = require("./routes/taskRoutes");
+const reportrouter = require("./routes/reportRoutes");
 
 const app = express();
 // Middleware to handle CORS
@@ -21,10 +24,10 @@ connectDB();
 app.use(express.json());
 
 // Routes
-app.use("/api/auth", authrouter);
-app.use("/api/users", userRoutes);
-// app.use("/api/tasks", taskRoutes);
-// app.use("/api/reports", reportRoutes);
+app.use("/api/auth", authRouter);
+app.use("/api/users", userRouter);
+app.use("/api/tasks", taskRouter);
+app.use("/api/reports", reportrouter);
 
 // Start Server
 const PORT = process.env.PORT || 5000;
