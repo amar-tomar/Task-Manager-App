@@ -139,4 +139,35 @@ const updateUserProfile = async (req, res) => {
   }
 };
 
-module.exports = { registerUser, loginUser, getUserProfile, updateUserProfile };
+const uploadImage = async (req, res) => {
+  if (!req.file) {
+    return res.status(400).json({ message: "No file uploaded" });
+  }
+
+  const imageUrl = `${req.protocol}://${req.get("host")}/uploads/${req.file.filename}`;
+
+  try {
+    // Get user from token (set in middleware `protect`)
+    const user = await User.findById(req.user._id);
+
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    // Save the image URL to user's profile
+    user.profilePic = imageUrl;
+    await user.save();
+
+    // Optional: Log to confirm it's saved
+    console.log("Profile image updated:", user.profilePic);
+
+    res.status(200).json({ imageUrl: user.profilePic });
+  } catch (error) {
+    console.error("Error updating profile:", error);
+    res.status(500).json({ message: "Failed to update user profile" });
+  }
+};
+
+
+
+module.exports = { registerUser, loginUser, getUserProfile, updateUserProfile,uploadImage};

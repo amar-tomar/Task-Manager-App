@@ -1,4 +1,4 @@
-const API_BASE_URL = process.env.REACT_APP_API_URL || "http://localhost:5000";
+export const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
 export const apiPaths = {
   auth: {
@@ -24,7 +24,7 @@ export const apiPaths = {
     userDashboardData: `${API_BASE_URL}/api/tasks/user-dashboard-data`,
   },
   reports: {
-    exportUsers: `${API_BASE_URL}/api/reports/export/tasks`,
+    exportTasks: `${API_BASE_URL}/api/reports/export/tasks`,
     exportUsers: `${API_BASE_URL}/api/reports/export/users`,
   },
 };

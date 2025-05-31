@@ -95,7 +95,7 @@ const createTask = async (req, res) => {
       title,
       description,
       priority,
-      dueData,
+      dueDate,
       assignedTo,
       attachments,
       todoChecklist,
@@ -109,7 +109,7 @@ const createTask = async (req, res) => {
       title,
       description,
       priority,
-      dueData,
+      dueDate,
       assignedTo,
       attachments,
       todoChecklist,
@@ -219,7 +219,7 @@ const updateTaskChecklist = async (req, res) => {
     } else if (task.progress > 0) {
       task.status = "In Progress";
     } else {
-      task.status = "pending";
+      task.status = "Pending";
     }
     await task.save();
     const updatedTask = await Task.findById(req.params.id).populate(
@@ -234,8 +234,9 @@ const updateTaskChecklist = async (req, res) => {
 // @route Get /api/task/dashboard-data
 // @access Private (Admin Only)
 
-const getDashboardData = async (req, res) => {
+const getUserDashboardData = async (req, res) => {
   try {
+    console.log("i am working");
   } catch (error) {
     res.status(500).json({ message: "Server error", error: error.message });
   }
@@ -244,73 +245,94 @@ const getDashboardData = async (req, res) => {
 // @route Get /api/task/dashboard-data
 // @access Private (Admin Only)
 
-const getUserDashboardData = async (req, res) => {
+const getDashboardData = async (req, res) => {
   try {
-    // Fetch statistics
-    const totalTasks = await Task.countDocuments();
-    const pendingTasks = await Task.countDocuments({ status: "Pending" });
-    const completedTasks = await Task.countDocuments({ status: "Completed" });
-    const overdueTasks = await Task.countDocuments({
-      status: { $ne: "Completed" },
-      dueDate: { $lt: new Date() },
-    });
+    // Set base filter depending on the user's role
+    const baseFilter = req.user.role === "admin" ? {} : { assignedTo: req.user._id };
 
-    // Ensure all possible statues are included
-    const updateTaskStatus = ["Pending", "In Progress", "Completed"];
-    const taskDistributionRaw = await Task.aggregate([
-      {
-        $group: {
-          _id: "$status",
-          count: { $sum: 1 },
-        },
-      },
+    // Helper function to handle aggregation with dynamic filter
+    const getCount = async (filter) => {
+      return await Task.countDocuments(filter);
+    };
+
+    // Helper function to handle aggregation for status distribution
+    const getStatusDistribution = async (filter) => {
+      const rawStatus = await Task.aggregate([
+        { $match: filter },
+        { $project: { status: { $toLower: { $trim: { input: "$status" } } } } },
+        { $group: { _id: "$status", count: { $sum: 1 } } }
+      ]);
+      const statusDistribution = { pending: 0, "in progress": 0, completed: 0 };
+      rawStatus.forEach(({ _id, count }) => {
+        if (statusDistribution[_id] !== undefined) {
+          statusDistribution[_id] = count;
+        }
+      });
+      return statusDistribution;
+    };
+
+    // Helper function to handle priority distribution
+    const getPriorityDistribution = async (filter) => {
+      const rawPrio = await Task.aggregate([
+        { $match: filter },
+        { $group: { _id: "$priority", count: { $sum: 1 } } }
+      ]);
+      const priorityDistribution = ["Low", "Medium", "High"].reduce((acc, level) => {
+        const found = rawPrio.find((i) => i._id === level);
+        acc[level] = found ? found.count : 0;
+        return acc;
+      }, {});
+      return priorityDistribution;
+    };
+
+    // Counts: total tasks and overdue tasks
+    const [totalTasks, overdueTasks] = await Promise.all([
+      getCount(baseFilter),
+      getCount({
+        ...baseFilter,
+        status: { $ne: "Completed" },
+        dueDate: { $lt: new Date() }
+      })
     ]);
-    const taskDistribution = taskStatuses.reduce((acc, status) => {
-      const formattedKey = status.replace(/\s+/g, ""); // Remove spaces for response key
-      acc[formattedKey] =
-        taskDistributionRaw.find((item) => item.id === status)?.count || 0;
-      return acc;
-    }, {});
-    taskDistributionRaw["All"] = totalTasks; // Add total count to taskDistribution
-    // Ensure all priority levels all included
-    const taskPriorities = ["Low", "Medium", "High"];
-    const taskPriorityLevelsRaw = await Task.aggregate([
-      {
-        $group: {
-          _id: "$priority",
-          count: { $sum: 1 },
-        },
-      },
+
+    // Aggregation for status and priority distribution
+    const [statusDistribution, priorityDistribution] = await Promise.all([
+      getStatusDistribution(baseFilter),
+      getPriorityDistribution(baseFilter)
     ]);
-    const taskPriorityLevels = taskPriorities.reduce((acc, priority) => {
-      acc[priority] =
-        taskPriorityLevelsRaw.find((item) => {
-          item.id === priority;
-        })?.count || 0;
-      return acc;
-    }, {});
-    // Fetch recent 10 tasks
-    const recentTasks = await Task.find({assignedTo:userId})
+
+    // Destructuring status for easier mapping
+    const { pending, "in progress": inProgress, completed } = statusDistribution;
+
+    // Fetch recent tasks
+    const recentTasks = await Task.find(baseFilter)
       .sort({ createdAt: -1 })
       .limit(10)
       .select("title status priority dueDate createdAt");
-    res.status(200).json({
+
+    // Respond with the formatted dashboard data
+    return res.json({
       statistics: {
         totalTasks,
-        pendingTasks,
-        completedTasks,
-        overdueTasks,
+        pendingTasks: pending,
+        inProgressTasks: inProgress,
+        completedTasks: completed,
+        overdueTasks
       },
-      charts: {
-        taskDistribution,
-        taskPriorityLevels,
-      },
-      recentTasks,
+      charts: { statusDistribution, priorityDistribution },
+      recentTasks
     });
-  } catch (error) {
-    res.status(500).json({ message: "Server error", error: error.message });
+  } catch (err) {
+    // Improved error logging and response structure
+    console.error(`Error occurred while fetching dashboard data: ${err.message}`);
+    return res.status(500).json({
+      message: "Server error",
+      error: err.message,
+      stack: err.stack
+    });
   }
 };
+
 
 module.exports = {
   getTasks,

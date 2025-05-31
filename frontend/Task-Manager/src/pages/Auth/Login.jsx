@@ -1,15 +1,17 @@
-import React, { useState } from "react";
+import React, { useContext, useState } from "react";
 import AuthLayout from "../../components/layout/AuthLayout";
 import Input from "../../components/Input/Input";
 import { Link, useNavigate } from "react-router-dom";
 import { validateEmail } from "../../utils/helper";
 import apiPaths from "../../utils/apiPaths";
 import axiosInstance from "../../utils/axiosInstance.js";
+import { UserContext } from "../../context/userContext.jsx";
 const Login = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState(null);
 
+  const { updateUser } = useContext(UserContext);
   const navigate = useNavigate();
 
   // Handle Login Form Submit
@@ -27,11 +29,12 @@ const Login = () => {
     setError("");
     // Login API
     try {
-      const response = await axiosInstance.post(apiPaths.auth.register, {
+      const response = await axiosInstance.post(apiPaths.auth.login, {
         email,
         password,
       });
       const { token, role } = response.data;
+      updateUser(response.data);
       if (token) {
         localStorage.setItem("token", token);
         // Redirect based on role
@@ -42,8 +45,8 @@ const Login = () => {
         }
       }
     } catch (error) {
-      if(error.response && error.response.message){
-        setError("Something is wrong. Please try again !")
+      if (error.response && error.response.message) {
+        setError("Something is wrong. Please try again !");
       }
     }
   };

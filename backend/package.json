@@ -3,7 +3,8 @@
   "version": "1.0.0",
   "main": "server.js",
   "scripts": {
-    "dev": "nodemon server.js",
+     "dev":   "cross-env HOST=0.0.0.0 PORT=8000 nodemon server.js",
+    "start": "cross-env HOST=0.0.0.0 PORT=8000 node server.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],
@@ -21,5 +22,8 @@
     "mongodb": "^6.16.0",
     "mongoose": "^8.14.0",
     "multer": "^1.4.5-lts.2"
+  },
+  "devDependencies": {
+    "cross-env": "^7.0.3"
   }
 }

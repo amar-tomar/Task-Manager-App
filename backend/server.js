@@ -22,6 +22,8 @@ app.use(
 connectDB();
 // Middleware
 app.use(express.json());
+// Static folder to serve images
+app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 
 // Routes
 app.use("/api/auth", authRouter);
@@ -29,6 +31,12 @@ app.use("/api/users", userRouter);
 app.use("/api/tasks", taskRouter);
 app.use("/api/reports", reportrouter);
 
+// Testing For server is running on my phone
+app.get("/health", (req, res) => res.json({ status: "ok" }));
+
 // Start Server
-const PORT = process.env.PORT || 5000;
-app.listen(PORT, () => console.log(` Server Running on port ${PORT}!`));
+const HOST = process.env.HOST || "0.0.0.0";
+const PORT = process.env.PORT || 8000;
+app.listen(PORT, HOST, () => {
+  console.log(`Server running on http://${HOST}:${PORT}`);
+});

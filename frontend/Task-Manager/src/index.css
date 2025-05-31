@@ -1,26 +1,45 @@
-@import url('https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap');
+@import url("https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap");
 @import "tailwindcss";
 
-@theme{
-    --font-display: "Poppins","sans-serif";
-    --breakpoint-3xl: 1920px;
-    --color--primary:#1368EC;
+@theme {
+  --font-display: "Poppins", "sans-serif";
+  --breakpoint-3xl: 1920px;
+  --color--primary: #1368ec;
 }
 @layer base {
-    html {
-        font-family: var(--font-display);
-    }
-    body {
-        background-color: #fcfbfc;
-        overflow-y: hidden;
-    }
+  html {
+    font-family: var(--font-display);
+  }
+  body {
+    background-color: #fcfbfc;
+    overflow-y: hidden;
+  }
 }
 
-.input-box{
-    @apply w-full flex justify-between gap-5 text-sm text-black bg-slate-100/50 rounded px-4 py-3 mb-4 mt-3 border border-slate-200 outline-none;
+.input-box {
+  @apply w-full flex justify-between gap-5 text-sm text-black bg-slate-100/50 rounded px-4 py-3 mb-4 mt-3 border border-slate-200 outline-none;
 }
 
-.btn-primary{
-    @apply w-full text-sm text-center text-white bg-blue-500 shadow-lg shadow-purple-600/5 p-[5px] my-1 rounded-md hover:bg-blue-600 cursor-pointer;
+.btn-primary {
+  @apply w-full text-sm text-center text-white bg-blue-500 shadow-lg shadow-purple-600/5 p-[5px] my-1 rounded-md hover:bg-blue-600 cursor-pointer;
+}
+.card {
+  @apply bg-white p-6 rounded-2xl shadow-md shadow-gray-100 border border-gray-200/50;
+}
 
+.form-card {
+  @apply bg-white p-6 rounded-lg shadow-md shadow-gray-100 border border-gray-200/50;
+}
+
+.form-input {
+  @apply w-full text-sm text-black outline-none bg-white border border-slate-100 px-2.5 py-3 rounded-md mt-2 placeholder:text-gray-500;
+}
+
+.card-btn {
+  @apply bg-gray-200 p-2 rounded-2xl shadow-md shadow-gray-100 border border-gray-200/50;
+}
+
+.add-btn{
+  @apply w-full flex items-center justify-center gap-1.5 text-xs
+  md:text-sm font-medium text-white whitespace-nowrap bg-blue-500 border border-blue-500 rounded-lg px-4 py-2 cursor-pointer
 }

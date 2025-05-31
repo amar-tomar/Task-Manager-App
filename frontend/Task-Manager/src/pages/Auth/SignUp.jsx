@@ -1,9 +1,13 @@
-import React, { useState } from "react";
+import React, { useContext, useState } from "react";
 import AuthLayout from "../../components/layout/AuthLayout";
 import Input from "../../components/Input/Input";
 import { Link, useNavigate } from "react-router-dom";
 import { validateEmail } from "../../utils/helper";
 import ProfilePhotoSelector from "../../components/Input/ProfilePhotoSelector";
+import { UserContext } from "../../context/userContext";
+import axiosInstance from "../../utils/axiosInstance";
+import apiPaths from "../../utils/apiPaths";
+import uploadImage from "../../utils/uploadImage";
 
 const SignUp = () => {
   const [profilePic, setProfilePic] = useState(null); // better to be null
@@ -13,9 +17,12 @@ const SignUp = () => {
   const [adminInviteToken, setAdminInviteToken] = useState("");
   const [error, setError] = useState(null);
 
+  const { updateUser } = useContext(UserContext);
   const navigate = useNavigate();
 
   const handleSignUp = async (e) => {
+    let profileImageUrl = {};
+
     e.preventDefault();
     if (!fullName) {
       setError("Please enter your full name.");
@@ -32,6 +39,36 @@ const SignUp = () => {
 
     setError("");
     // SignUP API Logic goes here
+    try {
+      // Upload Image if Present
+      if (profilePic) {
+        const imgUploadRes = await uploadImage(profilePic);
+        profileImageUrl = imgUploadRes.imageUrl || "";
+      }
+
+      const response = await axiosInstance.post(apiPaths.auth.register, {
+        name: fullName,
+        email,
+        password,
+        adminInviteToken,
+        profileImageUrl: profileImageUrl,
+      });
+      const { token, role } = response.data;
+      updateUser(response.data);
+      if (token) {
+        localStorage.setItem("token", token);
+        // Redirect based on role
+        if (role === "admin") {
+          navigate("/admin/dashboard");
+        } else {
+          navigate("/user/user-dashboard");
+        }
+      }
+    } catch (error) {
+      if (error.response && error.response.message) {
+        setError("Something is wrong. Please try again !");
+      }
+    }
   };
 
   return (
