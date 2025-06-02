@@ -1,4 +1,4 @@
-import React, { useState, } from "react";
+import React, { useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import DashboardLayout from "../../components/layout/DashboardLayout";
 import { PRIORITY_DATA } from "../../utils/data";
@@ -13,8 +13,8 @@ import AddAttachmentInput from "../../components/Input/AddAttachmentInput";
 
 const CreateTask = () => {
   const location = useLocation();
-  const { taskId } = location.state || {};
   const navigate = useNavigate();
+  const { taskId } = location.state || {};
 
   const [taskData, setTaskData] = useState({
     title: "",
@@ -25,16 +25,16 @@ const CreateTask = () => {
     todoChecklist: [],
     attachments: [],
   });
-  const [currentTask, setCurrentTask] = useState(null);
+
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const [openDeleteAlert, setOpenDeleteAlert] = useState(false);
 
   const handleValueChange = (key, value) => {
-    setTaskData((prevData) => ({ ...prevData, [key]: value }));
+    setTaskData((prev) => ({ ...prev, [key]: value }));
   };
 
-  const clearData = () => {
+  const clearForm = () => {
     setTaskData({
       title: "",
       description: "",
@@ -44,72 +44,77 @@ const CreateTask = () => {
       todoChecklist: [],
       attachments: [],
     });
+    setError("");
+  };
+
+  const validateTaskData = () => {
+    if (!taskData.title.trim()) return "Title is required.";
+    if (!taskData.description.trim()) return "Description is required.";
+    if (!taskData.dueDate) return "Due date is required.";
+    if (taskData.assignedTo.length === 0)
+      return "Task is not assigned to any member.";
+    if (taskData.todoChecklist.length === 0)
+      return "Add at least one todo task.";
+    return "";
   };
 
   const createTask = async () => {
     setLoading(true);
     try {
-      const todolist = taskData.todoChecklist?.map((item) => ({
+      const formattedTodoList = taskData.todoChecklist.map((item) => ({
         text: item,
-        compelted: false,
+        completed: false,
       }));
 
-      const response = await axiosInstance.post(apiPaths.tasks.createTask, {
+      await axiosInstance.post(apiPaths.tasks.createTask, {
         ...taskData,
         dueDate: new Date(taskData.dueDate).toISOString(),
-        todoChecklist: todolist,
+        todoChecklist: formattedTodoList,
       });
-      toast.success("Task Creatd Successfully");
-      clearData();
+
+      toast.success("Task Created Successfully");
+      clearForm();
     } catch (error) {
-      console.error("Error Creating task:", error);
-      setLoading(false);
+      console.error("Error creating task:", error);
+      setError("Failed to create task. Please try again.");
     } finally {
       setLoading(false);
     }
   };
-  const updateTask = async () => {};
-  const getTaskDetailsByID = async () => {};
-  const deleteTask = async () => {};
 
-  const handleSubmit = async () => {
-    setError(null);
-    // Input validation
-    if (!taskData.title.trim()) {
-      setError("Title is required.");
+  const updateTask = async () => {
+    // TODO: Implement update task logic
+    toast("Update functionality is not implemented yet.");
+  };
+
+  const getTaskDetailsByID = async () => {
+    // TODO: Implement fetching task details logic
+  };
+
+  const deleteTask = async () => {
+    // TODO: Implement delete task logic
+    setOpenDeleteAlert(false);
+  };
+
+  const handleSubmit = () => {
+    const validationError = validateTaskData();
+    if (validationError) {
+      setError(validationError);
       return;
     }
 
-    if (!taskData.description.trim()) {
-      setError("Description is required.");
-      return;
-    }
-
-    if (!taskData.dueDate) {
-      setError("Due date is required.");
-      return;
-    }
-
-    if (!taskData.assignedTo?.length === 0) {
-      setError("Task is not assigned to any member.");
-      return;
-    }
-    if (taskData.todoChecklist?.length === 0) {
-      setError("Add atleast one todo task.");
-      return;
-    }
     if (taskId) {
       updateTask();
-      return;
+    } else {
+      createTask();
     }
-    createTask();
   };
 
   return (
     <DashboardLayout activeMenu='Create Task'>
       <div className='mt-5'>
         <div className='grid grid-cols-3 md:grid-cols-2 mt-4'>
-          <div className='form-card col-span-3 w-full '>
+          <div className='form-card col-span-3 w-full'>
             <div className='flex items-center justify-between'>
               <h2 className='text-xl font-semibold text-slate-800'>
                 {taskId ? "Update Task" : "Create Task"}
@@ -126,7 +131,7 @@ const CreateTask = () => {
               )}
             </div>
 
-            {/* Task Title */}
+            {/* Title */}
             <div className='mt-4'>
               <label
                 htmlFor='title'
@@ -182,7 +187,7 @@ const CreateTask = () => {
               </div>
             </div>
 
-            {/* DueDate */}
+            {/* Due Date */}
             <div className='col-span-6 md:col-span-4 mt-3'>
               <label className='text-xs font-medium text-slate-600'>
                 Due Date
@@ -221,7 +226,7 @@ const CreateTask = () => {
               />
             </div>
 
-            {/* Add Attachments */}
+            {/* Attachments */}
             <div className='mt-3'>
               <label className='text-xs font-medium text-slate-600'>
                 Add Attachments
@@ -234,6 +239,7 @@ const CreateTask = () => {
               />
             </div>
 
+            {/* Error */}
             {error && (
               <p className='text-xs font-medium text-red-500 mt-5'>{error}</p>
             )}

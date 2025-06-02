@@ -5,58 +5,57 @@ import { LuUsers } from "react-icons/lu";
 import Modal from "../layout/Modal";
 import AvatarGroup from "../layout/AvatarGroup";
 
-const SelectUsers = () => {
+const SelectUsers = ({ selectedUsers, setSelectedUsers }) => {
   const [allUsers, setAllUsers] = useState([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [tempSelectedUsers, setTempSelectedUsers] = useState([]);
-  const [selectedUsers, setSelectedUsers] = useState([]);
 
   // Fetch all users once on mount
   useEffect(() => {
-    const getAllUsers = async () => {
+    const fetchUsers = async () => {
       try {
-        const response = await axiosInstance.get(apiPaths.users.getAllUsers);
-        if (response.data?.length) {
-          setAllUsers(response.data);
+        const { data } = await axiosInstance.get(apiPaths.users.getAllUsers);
+        if (Array.isArray(data)) {
+          setAllUsers(data);
         }
       } catch (err) {
         console.error("Failed to fetch users:", err);
       }
     };
-    getAllUsers();
+    fetchUsers();
   }, []);
 
   // Sync tempSelectedUsers with selectedUsers when modal opens
   useEffect(() => {
     if (isModalOpen) {
-      setTempSelectedUsers(selectedUsers);
+      setTempSelectedUsers([...selectedUsers]);
     }
   }, [isModalOpen, selectedUsers]);
 
-  // Toggle selection in modal
   const toggleUserSelection = (userId) => {
     setTempSelectedUsers((prev) =>
-      prev.includes(userId) ? prev.filter((id) => id !== userId) : [...prev, userId]
+      prev.includes(userId)
+        ? prev.filter((id) => id !== userId)
+        : [...prev, userId]
     );
   };
 
-  // Assign selected users and close modal
   const handleAssign = () => {
-    setSelectedUsers(tempSelectedUsers);
+    setSelectedUsers([...tempSelectedUsers]);
     setIsModalOpen(false);
   };
 
-  // Get avatars for selected users
-  const selectedUserAvatars = allUsers
+  const selectedAvatars = allUsers
     .filter((user) => selectedUsers.includes(user._id))
     .map((user) => user.profileImageUrl);
 
   return (
     <div className="space-y-4 mt-2">
-      {selectedUserAvatars.length === 0 ? (
+      {selectedAvatars.length === 0 ? (
         <button
           className="card-btn flex justify-center items-center gap-1.5 text-black"
           onClick={() => setIsModalOpen(true)}
+          type="button"
         >
           <LuUsers className="text-sm" />
           Add Members
@@ -66,53 +65,68 @@ const SelectUsers = () => {
           className="cursor-pointer"
           onClick={() => setIsModalOpen(true)}
           title="Edit Members"
+          role="button"
+          tabIndex={0}
+          onKeyPress={(e) => { if (e.key === "Enter") setIsModalOpen(true); }}
         >
-          <AvatarGroup avatars={selectedUserAvatars} maxVisible={3} />
+          <AvatarGroup avatars={selectedAvatars} maxVisible={3} />
         </div>
       )}
 
-      <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} title="Select Users">
+      <Modal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        title="Select Users"
+      >
         <div className="space-y-4 h-[60vh] overflow-y-auto">
-          {allUsers.map((user) => (
-            <div
-              key={user._id}
-              className="flex items-center gap-4 p-2 border rounded-md"
-            >
-              <img
-                src={user.profileImageUrl}
-                alt={user.name}
-                className="w-10 h-10 rounded-full object-cover"
-              />
-              <div className="flex-1">
-                <h4 className="font-medium">{user.name}</h4>
-              </div>
-              <button
-                onClick={() => toggleUserSelection(user._id)}
-                className={`px-3 py-1 rounded-md text-sm ${
-                  tempSelectedUsers.includes(user._id)
-                    ? "bg-green-500 text-white"
-                    : "bg-gray-200"
-                }`}
+          {allUsers.length === 0 ? (
+            <p className="text-gray-500">No users available</p>
+          ) : (
+            allUsers.map((user) => (
+              <div
+                key={user._id}
+                className="flex items-center gap-4 p-2 border rounded-md"
               >
-                {tempSelectedUsers.includes(user._id) ? "Selected" : "Select"}
-              </button>
-            </div>
-          ))}
+                <img
+                  src={user.profileImageUrl}
+                  alt={user.name}
+                  className="w-10 h-10 rounded-full object-cover"
+                />
+                <div className="flex-1">
+                  <h4 className="font-medium">{user.name}</h4>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => toggleUserSelection(user._id)}
+                  className={`px-3 py-1 rounded-md text-sm ${
+                    tempSelectedUsers.includes(user._id)
+                      ? "bg-green-500 text-white"
+                      : "bg-gray-200"
+                  }`}
+                >
+                  {tempSelectedUsers.includes(user._id) ? "Selected" : "Select"}
+                </button>
+              </div>
+            ))
+          )}
+        </div>
 
-          <div className="flex justify-end gap-4 pt-4">
-            <button
-              className="px-4 py-2 border rounded-md"
-              onClick={() => setIsModalOpen(false)}
-            >
-              CANCEL
-            </button>
-            <button
-              className="px-4 py-2 bg-blue-600 text-white rounded-md"
-              onClick={handleAssign}
-            >
-              Assign Users
-            </button>
-          </div>
+        <div className="flex justify-end gap-4 pt-4">
+          <button
+            type="button"
+            className="px-4 py-2 border rounded-md"
+            onClick={() => setIsModalOpen(false)}
+          >
+            CANCEL
+          </button>
+          <button
+            type="button"
+            className="px-4 py-2 bg-blue-600 text-white rounded-md"
+            onClick={handleAssign}
+            disabled={tempSelectedUsers.length === 0}
+          >
+            Assign Users
+          </button>
         </div>
       </Modal>
     </div>
