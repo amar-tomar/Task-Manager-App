@@ -21,7 +21,7 @@ const SignUp = () => {
   const navigate = useNavigate();
 
   const handleSignUp = async (e) => {
-    let profileImageUrl = {};
+    let profileImageUrl = "";
 
     e.preventDefault();
     if (!fullName) {
@@ -51,10 +51,11 @@ const SignUp = () => {
         email,
         password,
         adminInviteToken,
-        profileImageUrl: profileImageUrl,
+        profileImageUrl,
       });
       const { token, role } = response.data;
       updateUser(response.data);
+      console.log(response.data);
       if (token) {
         localStorage.setItem("token", token);
         // Redirect based on role
@@ -73,55 +74,55 @@ const SignUp = () => {
 
   return (
     <AuthLayout>
-      <div className="lg:w-[100%] h-auto md:h-full mt-10 flex flex-col justify-center">
-        <h3 className="text-xl font-semibold text-black">Welcome!</h3>
-        <p className="text-xs text-slate-700 mt-[5px] mb-6">
+      <div className='lg:w-[100%] h-auto md:h-full mt-10 flex flex-col justify-center'>
+        <h3 className='text-xl font-semibold text-black'>Welcome!</h3>
+        <p className='text-xs text-slate-700 mt-[5px] mb-6'>
           Join us today by entering your details below.
         </p>
-        <form onSubmit={handleSignUp} className="">
+        <form onSubmit={handleSignUp} className=''>
           <ProfilePhotoSelector image={profilePic} setImage={setProfilePic} />
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
             <Input
               value={fullName}
               onChange={({ target }) => setFullName(target.value)}
-              label="Full Name"
-              placeholder="Your Name Here..."
-              type="text"
+              label='Full Name'
+              placeholder='Your Name Here...'
+              type='text'
             />
             <Input
               value={email}
               onChange={({ target }) => setEmail(target.value)}
-              label="Email Address"
-              placeholder="john@example.com"
-              type="email"
+              label='Email Address'
+              placeholder='john@example.com'
+              type='email'
             />
             <Input
               value={password}
               onChange={({ target }) => setPassword(target.value)}
-              label="Password"
-              placeholder="Your Password Here... Min 8 Characters"
-              type="password"
+              label='Password'
+              placeholder='Your Password Here... Min 8 Characters'
+              type='password'
             />
             <Input
               value={adminInviteToken}
               onChange={({ target }) => setAdminInviteToken(target.value)}
-              label="Admin Token"
-              placeholder="Your Token Here..."
-              type="text"
+              label='Admin Token'
+              placeholder='Your Token Here...'
+              type='text'
             />
           </div>
 
-          {error && <p className="text-red-500 text-xs pt-2">{error}</p>}
+          {error && <p className='text-red-500 text-xs pt-2'>{error}</p>}
 
-          <button type="submit" className="btn-primary mt-4 w-full">
+          <button type='submit' className='btn-primary mt-4 w-full'>
             Sign Up
           </button>
 
-          <p className="text-[13px] text-slate-800 mt-3">
+          <p className='text-[13px] text-slate-800 mt-3'>
             Already have an account?{" "}
             <Link
-              className="font-medium text-blue-500 no-underline"
-              to="/login"
+              className='font-medium text-blue-500 no-underline'
+              to='/login'
             >
               Login
             </Link>

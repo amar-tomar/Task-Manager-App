@@ -9,6 +9,8 @@ const UserProvider = ({ children }) => {
   const [Loading, setLoading] = useState(true); // Set loading initially to true
 
   useEffect(() => {
+    if(User) return;
+    
     const accessToken = localStorage.getItem("token");
     if (!accessToken) {
       setLoading(false);

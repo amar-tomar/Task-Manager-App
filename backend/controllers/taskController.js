@@ -74,7 +74,7 @@ const getTasks = async (req, res) => {
 
 const getTaskById = async (req, res) => {
   try {
-    const task = await Task.findById(req.params._id).populate(
+    const task = await Task.findById(req.params.id).populate(
       "assignedTo",
       "name email profileImageUrl"
     );

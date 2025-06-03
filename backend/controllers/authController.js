@@ -155,13 +155,13 @@ const uploadImage = async (req, res) => {
     }
 
     // Save the image URL to user's profile
-    user.profilePic = imageUrl;
+    user.profileImageUrl = imageUrl;
     await user.save();
 
     // Optional: Log to confirm it's saved
-    console.log("Profile image updated:", user.profilePic);
+    console.log("Profile image updated:", user.profileImageUrl);
 
-    res.status(200).json({ imageUrl: user.profilePic });
+    res.status(200).json({ imageUrl: user.profileImageUrl });
   } catch (error) {
     console.error("Error updating profile:", error);
     res.status(500).json({ message: "Failed to update user profile" });
