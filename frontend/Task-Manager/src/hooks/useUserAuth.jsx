@@ -1,21 +1,21 @@
 import { useContext, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { UserContext } from "../context/userContext";
+import { UserContext } from "../context/UserContext";
 
 const useUserAuth = () => {
-  const { User, Loading, clearUser } = useContext(UserContext);
+  const { user, loading, clearUser } = useContext(UserContext);
   const navigate = useNavigate();
 
   useEffect(() => {
     const token = localStorage.getItem("token");
 
-    if (Loading) return;
+    if (loading) return;
 
-    if (!User && !token) {
+    if (!user && !token) {
       clearUser();
       navigate("/login");
     }
-  }, [User, Loading, clearUser, navigate]);
+  }, [user, loading, clearUser, navigate]);
 };
 
 export default useUserAuth;

@@ -12,29 +12,41 @@ const generateToken = (userId) => {
 // @access Public
 const registerUser = async (req, res) => {
   try {
-    const { name, email, password, profileImageUrl, adminInviteToken } = req.body;
+    const { name, email, password, adminInviteToken } = req.body;
 
+    // Check if user already exists
     const userExists = await User.findOne({ email });
     if (userExists) {
       return res.status(400).json({ message: "User already exists" });
     }
 
+    // Determine user role
     let role = "member";
     if (adminInviteToken && adminInviteToken === process.env.ADMIN_INVITE_TOKEN) {
       role = "admin";
     }
 
+    // Hash password
     const salt = await bcrypt.genSalt(10);
     const hashedPassword = await bcrypt.hash(password, salt);
 
+    // Get profileImageUrl from uploaded file (if provided)
+    let profileImageUrl = "";
+    if (req.file) {
+      // Assuming uploads served from /uploads folder statically
+      profileImageUrl = `${req.protocol}://${req.get("host")}/uploads/${req.file.filename}`;
+    }
+
+    // Create the user document
     const user = await User.create({
       name,
       email,
       password: hashedPassword,
       role,
-      profileImageUrl,  // Correct spelling
+      profileImageUrl,
     });
 
+    // Respond with user data and JWT token
     res.status(201).json({
       _id: user._id,
       name: user.name,
@@ -44,9 +56,11 @@ const registerUser = async (req, res) => {
       token: generateToken(user._id),
     });
   } catch (error) {
+    console.error("Error in registerUser:", error);
     res.status(500).json({ message: "Server error", error: error.message });
   }
 };
+
 
 // @desc Login User
 // @route POST /api/auth/login
@@ -79,11 +93,11 @@ const loginUser = async (req, res) => {
 };
 
 // @desc Get User Profile
-// @route GET /api/auth/profile
+// @route GET /api/auth/getuserprofile
 // @access Private (Requires JWT)
 const getUserProfile = async (req, res) => {
   try {
-    const user = await User.findById(req.user._id).select("-password"); // use _id
+    const user = await User.findById(req.user._id).select("-password"); 
 
     if (!user) {
       return res.status(404).json({ message: "User not found" });
@@ -102,7 +116,7 @@ const getUserProfile = async (req, res) => {
 };
 
 // @desc Update User Profile
-// @route PUT /api/auth/profile
+// @route PUT /api/auth/updateserprofile
 // @access Private (Requires JWT)
 const updateUserProfile = async (req, res) => {
   try {
@@ -139,35 +153,8 @@ const updateUserProfile = async (req, res) => {
   }
 };
 
-const uploadImage = async (req, res) => {
-  if (!req.file) {
-    return res.status(400).json({ message: "No file uploaded" });
-  }
-
-  const imageUrl = `${req.protocol}://${req.get("host")}/uploads/${req.file.filename}`;
-
-  try {
-    // Get user from token (set in middleware `protect`)
-    const user = await User.findById(req.user._id);
-
-    if (!user) {
-      return res.status(404).json({ message: "User not found" });
-    }
-
-    // Save the image URL to user's profile
-    user.profileImageUrl = imageUrl;
-    await user.save();
-
-    // Optional: Log to confirm it's saved
-    console.log("Profile image updated:", user.profileImageUrl);
-
-    res.status(200).json({ imageUrl: user.profileImageUrl });
-  } catch (error) {
-    console.error("Error updating profile:", error);
-    res.status(500).json({ message: "Failed to update user profile" });
-  }
-};
 
 
 
-module.exports = { registerUser, loginUser, getUserProfile, updateUserProfile,uploadImage};
+
+module.exports = { registerUser, loginUser, getUserProfile, updateUserProfile};

@@ -4,18 +4,18 @@ const progress = ({ progress, status }) => {
   const getColor = () => {
     switch (status) {
       case "In Progress":
-        return "text-cyan-500 bg-cyan-50 border border-cyan-500/10";
+        return "text-cyan-900 bg-cyan-900 border border-cyan-900/10";
       case "Completed":
-        return "text-indigo-500 bg-indigo-50 border border-indigo-500/20";
+        return "text-indigo-900 bg-indigo-900 border border-indigo-900/20";
       default:
-        return "text-violet-500 bg-violet-50 border border-violet-500/10";
+        return "text-violet-900 bg-violet-900 border border-violet-900/10";
     }
   };
 
   return (
-    <div className='w-full bg-gray-200 rounded-full h-1.5'>
+    <div className='w-full bg-gray-200 rounded-full h-2'>
       <div
-        className={`${getColor} h-1.5 rounded-full text-center text-xs font-medium`}
+        className={`${getColor} h-2 rounded-full text-center text-xs font-medium`}
         style={{ width: `${progress}%` }}
       ></div>
     </div>

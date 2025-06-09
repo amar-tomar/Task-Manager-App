@@ -1,11 +1,10 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import DashboardLayout from "../../components/layout/DashboardLayout";
 import { useNavigate } from "react-router-dom";
 import axiosInstance from "../../utils/axiosInstance";
 import apiPaths from "../../utils/apiPaths";
 import { LuFileSpreadsheet } from "react-icons/lu";
 import TaskStatusTabs from "../../components/layout/TaskStatusTabs";
-import AddAttachmentInput from "./../../components/Input/AddAttachmentInput";
 import TaskCard from "../../components/Cards/TaskCard";
 
 const ManageTasks = () => {
@@ -15,7 +14,7 @@ const ManageTasks = () => {
 
   const navigate = useNavigate();
 
-  const getAllTasks = async () => {
+  const getAllTasks = useCallback(async () => {
     try {
       const response = await axiosInstance.get(apiPaths.tasks.getAllTasks, {
         params: {
@@ -28,14 +27,14 @@ const ManageTasks = () => {
       const statusArray = [
         { label: "All", count: statusSummary.all || 0 },
         { label: "Pending", count: statusSummary.pendingTasks || 0 },
-        { label: "In Progress", count: statusSummary.inProgress || 0 },
+        { label: "In Progress", count: statusSummary.inProgressTasks || 0 },
         { label: "Completed", count: statusSummary.completedTasks || 0 },
       ];
       setTabs(statusArray);
     } catch (error) {
       console.error("Error fetching tasks:", error);
     }
-  };
+  }, [filterStatus]); // filterStatus is a dependency
 
   const handleClick = (taskData) => {
     navigate(`/admin/create-task`, { state: { taskId: taskData._id } });
@@ -47,11 +46,11 @@ const ManageTasks = () => {
 
   useEffect(() => {
     getAllTasks();
-  }, [filterStatus]);
+  }, [getAllTasks]);
 
   return (
     <DashboardLayout activeMenu='Manage Tasks'>
-      <div className='my-5'>
+      <div className='card'>
         <div className='flex flex-col lg:flex-row md:items-center justify-between'>
           <div className='flex items-center justify-between gap-3'>
             <h2 className='text-xl lg:text-xl font-medium'>My Tasks</h2>
@@ -95,14 +94,14 @@ const ManageTasks = () => {
               dueDate={item.dueDate}
               assignedTo={item.assignedTo?.map((item) => item.profileImageUrl)}
               attachmentCount={item.attachments?.length || 0}
-              completedTodoCount={item.completedTodoCount || 0}
+              completedTodoCount={item.todoChecklist?.filter((item) => item.completed).length || 0}
               todoChecklist={item.todoChecklist || []}
               onClick={() => handleClick(item)}
             />
           ))}
         </div>
       </div>
-    </DashboardLayout>
+        </DashboardLayout>
   );
 };
 

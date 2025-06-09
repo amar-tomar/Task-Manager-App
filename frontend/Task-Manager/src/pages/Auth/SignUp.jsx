@@ -4,13 +4,12 @@ import Input from "../../components/Input/Input";
 import { Link, useNavigate } from "react-router-dom";
 import { validateEmail } from "../../utils/helper";
 import ProfilePhotoSelector from "../../components/Input/ProfilePhotoSelector";
-import { UserContext } from "../../context/userContext";
+import { UserContext } from "../../context/UserContext";
 import axiosInstance from "../../utils/axiosInstance";
 import apiPaths from "../../utils/apiPaths";
-import uploadImage from "../../utils/uploadImage";
 
 const SignUp = () => {
-  const [profilePic, setProfilePic] = useState(null); // better to be null
+  const [profilePic, setProfilePic] = useState(null);
   const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -21,56 +20,69 @@ const SignUp = () => {
   const navigate = useNavigate();
 
   const handleSignUp = async (e) => {
-    let profileImageUrl = "";
+  e.preventDefault();
 
-    e.preventDefault();
-    if (!fullName) {
-      setError("Please enter your full name.");
-      return;
-    }
-    if (!validateEmail(email)) {
-      setError("Please enter a valid email address.");
-      return;
-    }
-    if (!password) {
-      setError("Please enter the password.");
-      return;
+  console.log("SignUp initiated");
+  console.log("Full Name:", fullName);
+  console.log("Email:", email);
+  console.log("Admin Invite Token:", adminInviteToken);
+  console.log("Profile Pic:", profilePic);
+
+  if (!fullName) {
+    setError("Please enter your full name.");
+    console.log("Error: Full name missing");
+    return;
+  }
+  if (!validateEmail(email)) {
+    setError("Please enter a valid email address.");
+    console.log("Error: Invalid email");
+    return;
+  }
+  if (!password) {
+    setError("Please enter the password.");
+    console.log("Error: Password missing");
+    return;
+  }
+
+  setError("");
+
+  try {
+    // Prepare form data for sending with file upload
+    const formData = new FormData();
+    formData.append("name", fullName);
+    formData.append("email", email);
+    formData.append("password", password);
+    formData.append("adminInviteToken", adminInviteToken);
+    if (profilePic) {
+      formData.append("profileImage", profilePic);
+      console.log("Appending profile image to form data");
     }
 
-    setError("");
-    // SignUP API Logic goes here
-    try {
-      // Upload Image if Present
-      if (profilePic) {
-        const imgUploadRes = await uploadImage(profilePic);
-        profileImageUrl = imgUploadRes.imageUrl || "";
-      }
+    console.log("Sending signup request with form data...");
+    const response = await axiosInstance.post(apiPaths.auth.register, formData, {
+      headers: {
+        "Content-Type": "multipart/form-data",
+      },
+    });
 
-      const response = await axiosInstance.post(apiPaths.auth.register, {
-        name: fullName,
-        email,
-        password,
-        adminInviteToken,
-        profileImageUrl,
-      });
-      const { token, role } = response.data;
-      updateUser(response.data);
-      console.log(response.data);
-      if (token) {
-        localStorage.setItem("token", token);
-        // Redirect based on role
-        if (role === "admin") {
-          navigate("/admin/dashboard");
-        } else {
-          navigate("/user/user-dashboard");
-        }
-      }
-    } catch (error) {
-      if (error.response && error.response.message) {
-        setError("Something is wrong. Please try again !");
+    console.log("Signup response:", response.data);
+    const { token, role } = response.data;
+    updateUser(response.data);
+
+    if (token) {
+      localStorage.setItem("token", token);
+      console.log("Token saved. Navigating based on role:", role);
+      if (role === "admin") {
+        navigate("/admin/admin-dashboard");
+      } else {
+        navigate("/user/user-dashboard");
       }
     }
-  };
+  } catch (error) {
+    console.error("Signup error:", error);
+    setError("Something went wrong. Please try again!");
+  }
+};
 
   return (
     <AuthLayout>
@@ -79,7 +91,7 @@ const SignUp = () => {
         <p className='text-xs text-slate-700 mt-[5px] mb-6'>
           Join us today by entering your details below.
         </p>
-        <form onSubmit={handleSignUp} className=''>
+        <form onSubmit={handleSignUp}>
           <ProfilePhotoSelector image={profilePic} setImage={setProfilePic} />
           <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
             <Input

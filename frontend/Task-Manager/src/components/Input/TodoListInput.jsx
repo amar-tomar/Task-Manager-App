@@ -41,7 +41,7 @@ const TodoListInput = ({ todoList, setTodoList }) => {
       ))}
 
       {/* Input for new todo */}
-      <div className='flex items-center gap-2'>
+      <div className='lg:flex items-center gap-2'>
         <input
           type='text'
           placeholder='Enter a new task'
@@ -51,7 +51,7 @@ const TodoListInput = ({ todoList, setTodoList }) => {
         />
         <button
           onClick={handleAddOption}
-          className=' flex justify-center items-center p-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors'
+          className=' flex justify-center items-center lg:mt-0  mt-4 p-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors'
           title='Add task'
         >
           <HiOutlinePlus className='text-lg mr-1' />

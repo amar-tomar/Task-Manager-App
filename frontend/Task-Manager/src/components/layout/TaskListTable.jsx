@@ -43,31 +43,34 @@ const TaskListTable = ({ tableData = [] }) => {
           {tableData.length === 0 ? (
             <tr>
               <td colSpan="4" className="px-4 py-4 text-gray-500 text-center">
-                No tasks available.
+                No tasks available
               </td>
             </tr>
           ) : (
             tableData.map((task) => (
-              <tr key={task._id} className="border-t hover:bg-gray-50 transition">
+              <tr
+                key={task._id}
+                className="border-t hover:bg-gray-50 transition duration-200 ease-in-out"
+              >
                 <td className="px-4 py-4 text-[13px] text-gray-800 whitespace-nowrap line-clamp-1">
-                  {task.title}
+                  {task.title || 'N/A'}
                 </td>
                 <td className="px-4 py-4">
                   <span
                     className={`px-2 py-1 text-xs rounded ${getStatusBadgeColor(task.status)}`}
                   >
-                    {task.status}
+                    {task.status || 'N/A'}
                   </span>
                 </td>
                 <td className="px-4 py-4">
                   <span
                     className={`px-2 py-1 text-xs rounded ${getPriorityBadgeColor(task.priority)}`}
                   >
-                    {task.priority}
+                    {task.priority || 'N/A'}
                   </span>
                 </td>
-                <td className="px-4 py-4 text-[13px] text-gray-700 whitespace-nowrap">
-                  {moment(task.createdAt).format('Do MMM YYYY')}
+                <td className="px-4 py-4 text-[13px] text-gray-700 whitespace-nowrap hidden md:table-cell">
+                  {task.createdAt ? moment(task.createdAt).format('Do MMM YYYY') : 'N/A'}
                 </td>
               </tr>
             ))

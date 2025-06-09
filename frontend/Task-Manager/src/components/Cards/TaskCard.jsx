@@ -40,6 +40,7 @@ const TaskCard = ({
     }
   };
 
+
   return (
     <div
       className='bg-white rounded-xl py-4 mt-4 shadow-lg shadow-gray-100 border border-gray-200/50 cursor-pointer'

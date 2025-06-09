@@ -5,13 +5,12 @@ import {
     LuSquarePlus, 
     LuLogOut 
   } from "react-icons/lu";
-  
   // Admin Navigation Data
   export const adminNavData = [
     {
       label: "Dashboard",
       icon: LuLayoutDashboard,
-      path: "/admin/dashboard"
+      path: "/admin/admin-dashboard"
     },
     {
       label: "Manage Tasks",
@@ -24,10 +23,11 @@ import {
       path: "/admin/create-task"
     },
     {
-      label: "Logout",
-      icon: LuLogOut,
-      path: "/logout"
-    }
+      label: "Team Members",
+      icon: LuUsers,
+      path: "/admin/users"
+    },
+   
   ];
   
   // User Navigation Data
@@ -35,18 +35,13 @@ import {
     {
       label: "Dashboard",
       icon: LuLayoutDashboard,
-      path: "/user/dashboard"
+      path: "/user/user-dashboard"
     },
     {
       label: "My Tasks",
       icon: LuClipboardCheck,
-      path: "/user/tasks"
+      path: "/user/my-tasks"
     },
-    {
-      label: "Logout",
-      icon: LuLogOut,
-      path: "/logout"
-    }
   ];
   
   // Priority Data

@@ -78,7 +78,7 @@ const SelectUsers = ({ selectedUsers, setSelectedUsers }) => {
         onClose={() => setIsModalOpen(false)}
         title="Select Users"
       >
-        <div className="space-y-4 h-[60vh] overflow-y-auto">
+        <div className="space-y-4 h-min overflow-y-auto">
           {allUsers.length === 0 ? (
             <p className="text-gray-500">No users available</p>
           ) : (
